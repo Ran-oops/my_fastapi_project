@@ -9,9 +9,12 @@ load_dotenv()
 # DATABASE_URL = f"mysql+pymysql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
 # DATABASE_URL = "sqlite:///./sql_app.db"
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///data/test.db")
-engine = create_engine(
-    DATABASE_URL, connect_args={"check_same_thread": False}
-)
+if "sqlite" in DATABASE_URL:
+    engine = create_engine(
+        DATABASE_URL, connect_args={"check_same_thread": False}
+    )
+else:
+    engine = create_engine(DATABASE_URL)
 # 创建数据库引擎
 # engine = create_engine(DATABASE_URL)
 # 将会话工厂绑定到数据库引擎

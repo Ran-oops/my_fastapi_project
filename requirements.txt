@@ -3,3 +3,5 @@ uvicorn
 sqlalchemy
 python-dotenv
 email_validator
+gunicorn
+psycopg2-binary==2.9.*

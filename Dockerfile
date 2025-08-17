@@ -1,7 +1,8 @@
 FROM python:3.9
 
 WORKDIR /app
-
+ENV PIP_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple \
+    PIP_TRUSTED_HOST=pypi.tuna.tsinghua.edu.cn
 RUN chmod a+rwx /app
 COPY . .
 # 安装依赖
