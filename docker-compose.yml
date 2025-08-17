@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app/data:/app/app/data  # 持久化 SQLite 数据库
+      - .:/app        # 挂载代码目录（开发时热重载）
+    environment:
+      - DATABASE_URL=sqlite:////app/data/database.db

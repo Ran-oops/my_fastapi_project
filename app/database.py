@@ -7,7 +7,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # DATABASE_URL = f"mysql+pymysql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
-DATABASE_URL = "sqlite:///./sql_app.db"
+# DATABASE_URL = "sqlite:///./sql_app.db"
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///data/test.db")
 engine = create_engine(
     DATABASE_URL, connect_args={"check_same_thread": False}
 )
@@ -47,7 +48,7 @@ Windows 系统
     解压下载的 ZIP 文件，你会得到：
     sqlite3.exe（命令行工具）
 使用方式：
-    将 sqlite3.exe 放到你的项目目录（如 C:\Users\sunya\Desktop\python_2025\fastapi_project\）
+    将 sqlite3.exe 放到你的项目目录（如 c:\\Users\\sunya\\Desktop\\python_2025\\fastapi_project\\）
     然后在当前目录打开 PowerShell 运行：
 
 bash
