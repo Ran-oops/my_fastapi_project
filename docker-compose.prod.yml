@@ -30,6 +30,7 @@ services:
       - web
     networks:
       - frontend
+      - backend
 
   db:
     image: postgres:13-alpine
@@ -42,27 +43,44 @@ services:
       - pg_data:/var/lib/postgresql/data
     networks:
       - backend
-      # 添加监控服务
+
+  postgres_exporter:  # 新增PostgreSQL监控组件
+    image: prometheuscommunity/postgres-exporter
+    environment:
+      DATA_SOURCE_NAME: "postgresql://user:password@db:5432/prod_db?sslmode=disable"
+    ports:
+      - "29187:9187"
+    networks:
+      - backend
+    depends_on:
+      - db
 
   prometheus:
-      image: prom/prometheus
-      ports: [ "9090:9090" ]
-      volumes:
-          - ./prometheus:/etc/prometheus
-
-      networks:
-          - backend
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prom_data:/prometheus
+    networks:
+      - backend
 
   grafana:
-      image: grafana/grafana
-      ports: [ "3000:3000" ]
-      networks:
-          - backend
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning  # 预配置仪表盘
+    networks:
+      - backend
 
 networks:
-  frontend:
-  backend:
+  frontend: # 仅Nginx暴露端口
+  backend: #内部服务通信
 
 volumes:
   pg_data:
   static_data:
+  prom_data:
+  grafana_data:

@@ -74,23 +74,52 @@
 ## 项目结构
 
 ```
-.
-├── app/                 # FastAPI 应用
+fastapi_project/
+├── app/                      # FastAPI 应用代码
 │   ├── __init__.py
-│   ├── crud.py         # 数据库操作
-│   ├── database.py     # 数据库配置
-│   ├── main.py         # 应用入口
-│   ├── models.py       # 数据库模型
-│   ├── schemas.py      # 数据模型
-│   └── start.sh
-├── nginx/              # Nginx 配置
-├── prometheus/         # Prometheus 配置
-├── grafana/            # Grafana 配置
-├── Dockerfile          # 开发环境 Docker 配置
-├── Dockerfile.prod     # 生产环境 Docker 配置
-├── docker-compose.yml  # 开发环境编排
-└── docker-compose.prod.yml # 生产环境编排
+│   ├── main.py               # 主应用入口
+│   ├── models.py             # 数据库模型
+│   ├── schemas.py            # Pydantic 模型
+│   ├── crud.py               # 数据库操作
+│   ├── database.py           # 数据库连接
+│   └── static/               # 静态文件（CSS/JS等）
+│
+├── nginx/
+│   ├── nginx.conf            # Nginx 主配置文件
+│   └── ssl/                  # SSL 证书目录
+│       ├── fullchain.pem     # 证书链
+│       └── privkey.pem       # 私钥
+│
+├── prometheus/
+│   └── prometheus.yml        # Prometheus 监控配置
+│
+├── grafana/
+│   └── provisioning/         # Grafana 预配置
+│       ├── dashboards/       # 仪表盘JSON文件
+│       └── datasources/      # 数据源配置
+│
+├── docker-compose.yml        # 主部署文件
+├── Dockerfile.prod           # FastAPI 生产镜像构建文件
+├── requirements.txt          # Python 依赖
+└── .env                      # 环境变量（可选）
 ```
+## 目录结构特点
+1. 分层清晰
+   * 服务配置（Nginx/Prometheus）与应用代码分离
+    * 监控系统配置集中管理
+
+2. 安全性
+   * SSL 证书独立目录，方便权限控制
+   * 敏感配置（如数据库密码）通过 .env 或 Docker secrets 管理
+
+3. 可扩展性
+   * 添加新服务（如Redis）只需在 docker-compose.yml 扩展
+   * 监控仪表盘通过 Grafana 目录动态加载
+
+4. 生产就绪
+   * 包含从应用服务到监控的全套配置
+   * 支持 HTTPS、性能监控、数据持久化
+
 
 ## 开发说明
 
@@ -110,8 +139,9 @@ uvicorn app.main:app --host 0.0.0.0 --port 80 --workers 4
 
 项目集成了 Prometheus 和 Grafana 用于监控:
 
-- Prometheus: http://localhost:9090
-- Grafana: http://localhost:3000
+- Prometheus: http://localhost:9090/targets
+- Grafana: http://localhost:3000 (默认账号admin/admin)
+- FastAPI: https://yourdomain.com/docs
 
 ## 数据库
 
@@ -120,3 +150,27 @@ uvicorn app.main:app --host 0.0.0.0 --port 80 --workers 4
 - 生产环境使用 PostgreSQL
 
 数据库文件在开发环境中持久化存储在 `app/data` 目录中。
+
+## 备份方案： 定期备份关键卷
+```
+docker run --rm -v pg_data:/volume -v /backup:/backup alpine tar cvf /backup/pg_backup.tar /volume
+```
+
+## 日志查看
+检查fastapi日志：
+```
+docker-compose -f docker-compose.prod.yml logs web
+```
+
+进入Nginx容器测试连通性：
+```
+docker exec -it fastapi_project-nginx-1 sh
+wget -O- http://web:8000
+```
+
+## 项目重启
+```
+docker-compose -f docker-compose.prod.yml down
+docker-compose -f docker-compose.prod.yml up -d
+```
+
